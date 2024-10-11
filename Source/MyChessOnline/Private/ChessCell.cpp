@@ -10,7 +10,6 @@ void AChessCell::SetPawn(AChessPawn* p)
 {
 	pawn = p;
 	pawn->SetActorLocation(GetActorLocation());
-	pawn->SetActorRotation(GetActorRotation());
 }
 
 void AChessCell::BeginPlay()

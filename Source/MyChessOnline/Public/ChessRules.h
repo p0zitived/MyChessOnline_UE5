@@ -13,6 +13,8 @@ struct FPawnData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PawnData")
 	TSubclassOf<AChessPawn> pawnClass;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="PawnData")
+	bool isBlack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PawnData")
 	int X;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PawnData")

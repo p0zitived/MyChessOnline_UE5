@@ -38,9 +38,17 @@ void AChessGameMode::SetUpBoard()
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		AChessPawn* pawn = GetWorld()->SpawnActor<AChessPawn>(pawnData[i].pawnClass,params);
+		
+		// check daca sa primit sa spawnez pawn-ul
 		if (pawn)
 		{
-			cells[pawnData[i].X][pawnData[i].Y]->SetPawn(pawn);
+			pawn->SetTeam(pawnData[i].isBlack);
+
+			// check ca sa nu dea crash in caz ca bagi index gresit prin ChessRules
+			if (cells.IsValidIndex(pawnData[i].X) && cells[pawnData[i].X].IsValidIndex(pawnData[i].Y))
+			{
+				cells[pawnData[i].X][pawnData[i].Y]->SetPawn(pawn);
+			}
 		}
 	}
 }

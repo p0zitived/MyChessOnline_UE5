@@ -28,3 +28,18 @@ void AChessPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
+void AChessPawn::SetTeam(bool black)
+{
+	isBlack = black;
+
+	if (isBlack)
+	{
+		staticMesh->SetStaticMesh(blackMesh);
+		AddActorWorldRotation(FRotator(0, 180, 0));
+	}
+	else
+	{
+		staticMesh->SetStaticMesh(whiteMesh);
+	}
+}
+
