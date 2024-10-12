@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "ChessRules.h"
 #include "ChessCell.h"
-#include "ChessCell.h"
+#include "ChessPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "ChessGameMode.generated.h"
 
@@ -18,10 +18,12 @@ public:
 
 protected:
 	TArray<TArray<AChessCell*>> cells;
+	TArray<AChessPlayerController*> players;
 
 	virtual void BeginPlay() override;
 
 private:
 	void GenerateBoard();
 	void SetUpBoard();
+	void PreparePlayers();
 };

@@ -4,6 +4,7 @@ AChessCell::AChessCell()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	cellMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CellMesh"));
+	bReplicates = true;
 }
 
 void AChessCell::SetState(EChessCellState newState)

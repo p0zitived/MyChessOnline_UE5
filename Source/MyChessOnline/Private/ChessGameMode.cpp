@@ -2,8 +2,15 @@
 
 void AChessGameMode::BeginPlay() 
 {
-	GenerateBoard();
-	SetUpBoard();
+	if (HasAuthority())
+	{
+		GenerateBoard();
+		SetUpBoard();
+		
+		// Preapare players after delay
+		FTimerHandle timerHandle;
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AChessGameMode::PreparePlayers, 2, false);
+	}
 }
 
 void AChessGameMode::GenerateBoard()
@@ -51,4 +58,15 @@ void AChessGameMode::SetUpBoard()
 			}
 		}
 	}
+}
+
+void AChessGameMode::PreparePlayers()
+{
+	for (FConstPlayerControllerIterator it = GetWorld()->GetPlayerControllerIterator(); it; ++it)
+	{
+		players.Add(Cast<AChessPlayerController>(it->Get()));
+	}
+
+	players[0]->Init(false);
+	players[1]->Init(true);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/Pawn.h"
 #include "ChessPawn.generated.h"
 
@@ -17,11 +18,12 @@ public:
 	UStaticMesh* whiteMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Visaul Settings")
 	UStaticMesh* blackMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Chess Logic")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Chess Logic")
 	bool isBlack;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;

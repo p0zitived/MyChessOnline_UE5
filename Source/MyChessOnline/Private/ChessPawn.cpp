@@ -8,6 +8,8 @@ AChessPawn::AChessPawn()
 
 	FAttachmentTransformRules rules = FAttachmentTransformRules(EAttachmentRule::KeepRelative,false);
 	staticMesh->AttachToComponent(RootComponent,rules);
+	staticMesh->SetIsReplicated(true);
+	bReplicates = true;
 }
 
 void AChessPawn::BeginPlay()
@@ -43,3 +45,11 @@ void AChessPawn::SetTeam(bool black)
 	}
 }
 
+// NET CODING
+void AChessPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AChessPawn, staticMesh);
+	DOREPLIFETIME(AChessPawn, isBlack);
+}

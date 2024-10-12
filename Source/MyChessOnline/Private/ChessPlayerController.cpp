@@ -1,6 +1,6 @@
+#include "ChessPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
-#include "ChessPlayerController.h"
 
 void AChessPlayerController::Init(bool blackTeam)
 {
@@ -34,5 +34,5 @@ void AChessPlayerController::Init(bool blackTeam)
 
 void AChessPlayerController::BeginPlay()
 {
-	Init(false);
+
 }
