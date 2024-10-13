@@ -25,5 +25,5 @@ protected:
 private:
 	void GenerateBoard();
 	void SetUpBoard();
-	void PreparePlayers();
+	void PostLogin(APlayerController* NewPlayer);
 };

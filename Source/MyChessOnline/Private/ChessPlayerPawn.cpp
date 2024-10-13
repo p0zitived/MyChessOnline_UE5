@@ -1,3 +1,4 @@
+#include "ChessPlayerController.h"
 #include "ChessPlayerPawn.h"
 
 AChessPlayerPawn::AChessPlayerPawn()
@@ -9,7 +10,11 @@ AChessPlayerPawn::AChessPlayerPawn()
 void AChessPlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+}
+
+void AChessPlayerPawn::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
 }
 
 void AChessPlayerPawn::Tick(float DeltaTime)

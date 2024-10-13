@@ -11,10 +11,9 @@ class MYCHESSONLINE_API AChessPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	virtual void Init(bool blackTeam);
+	void UpdateCamera();
 
 protected:
-	// FUNCTIONS
-	virtual void BeginPlay() override;
 	// VARIABLES
 	bool isInBlackTeam;
 	bool isInited;

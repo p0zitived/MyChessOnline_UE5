@@ -2,15 +2,8 @@
 
 void AChessGameMode::BeginPlay() 
 {
-	if (HasAuthority())
-	{
-		GenerateBoard();
-		SetUpBoard();
-		
-		// Preapare players after delay
-		FTimerHandle timerHandle;
-		GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AChessGameMode::PreparePlayers, 2, false);
-	}
+	GenerateBoard();
+	SetUpBoard();
 }
 
 void AChessGameMode::GenerateBoard()
@@ -60,13 +53,20 @@ void AChessGameMode::SetUpBoard()
 	}
 }
 
-void AChessGameMode::PreparePlayers()
+void AChessGameMode::PostLogin(APlayerController* NewPlayer)
 {
-	for (FConstPlayerControllerIterator it = GetWorld()->GetPlayerControllerIterator(); it; ++it)
-	{
-		players.Add(Cast<AChessPlayerController>(it->Get()));
-	}
+	Super::PostLogin(NewPlayer);
 
-	players[0]->Init(false);
-	players[1]->Init(true);
+	players.Add(Cast<AChessPlayerController>(NewPlayer));
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "Player Connected");
+
+	if (players.Num() == 1)
+	{
+		players[0]->Init(false);
+	}
+	else
+	{
+		players[1]->Init(true);
+	}
 }

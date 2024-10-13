@@ -50,6 +50,5 @@ void AChessPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AChessPawn, staticMesh);
 	DOREPLIFETIME(AChessPawn, isBlack);
 }
