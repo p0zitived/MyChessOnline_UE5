@@ -4,10 +4,12 @@
 #include "GameFramework/GameModeBase.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "MainMenuGameMode.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FOnSessionsUpdated);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSessionCreated,FName,sessionName,bool,success);
+//DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSessionJoined,FName,sessionName, EOnJoinSessionCompleteResult::Type,result);
 
 USTRUCT(BlueprintType)
 struct FSessionData
@@ -18,13 +20,23 @@ struct FSessionData
 	FString sessionName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int hostLogoIndx;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool enemyConnected;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString enemyName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int enemyLogoIndx;
+	
 
 	FSessionData(){}
 
-	FSessionData(FString name,int logoIndx)
+	FSessionData(FString name,int logoIndx,bool enemyConn,FString enemyN,int enemyLogo)
 	{
 		sessionName = name;
 		hostLogoIndx = logoIndx;
+		enemyName = enemyN;
+		enemyLogoIndx = enemyLogoIndx;
+		enemyConnected = enemyConn;
 	}
 };
 
@@ -38,7 +50,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HD Online")
 	bool CreateSession(FString hostName, int hostLogoIndx, FOnSessionCreated onCompleted);
 	UFUNCTION(BlueprintCallable, Category = "HD Online")
-	bool ConnectToSession(int sessionIndex);
+	void ConnectToSession(int sessionIndex, FString nickname, int logo);
 	UFUNCTION(BlueprintCallable, Category = "HD Online")
 	void UpdateSessionsData(FOnSessionsUpdated onFinish);
 	// PROPERTIES
@@ -49,7 +61,12 @@ protected:
 	virtual void BeginPlay() override;
 	void OnSessionSearchCompleted(bool success);
 	void OnSessionCreationCompleted(FName sessionName, bool success);
+	void OnJoinedToSession(FName sessionName, EOnJoinSessionCompleteResult::Type result);
+	void OnSessionSettingsUpdated(FName sesionName,const FOnlineSessionSettings &settings);
+	void OnSessionUpdated(FName sessionName, bool success);
 	FOnSessionsUpdated auxOnSessionsUpdated;
 	FOnSessionCreated auxOnSessionCreated;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+	FString auxPlayerName;
+	int auxPlayerLogo;
 };
