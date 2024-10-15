@@ -11,6 +11,7 @@ bool AMainMenuGameMode::CreateSession(FString hostName, int hostLogoIndx, FOnSes
 	{
 		IOnlineSessionPtr Session = OnlineSubsystem->GetSessionInterface();
 
+		bool auxValue = false;
 		TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
 		SessionSettings->bAllowJoinInProgress = true;
 		SessionSettings->bIsDedicated = false;
@@ -20,11 +21,11 @@ bool AMainMenuGameMode::CreateSession(FString hostName, int hostLogoIndx, FOnSes
 		SessionSettings->NumPublicConnections = 2;
 		SessionSettings->Set("HostLogo", hostLogoIndx, EOnlineDataAdvertisementType::ViaOnlineService);
 		SessionSettings->Set("HostName", hostName, EOnlineDataAdvertisementType::ViaOnlineService);
-		SessionSettings->Set("EnemyConnected", false, EOnlineDataAdvertisementType::ViaOnlineService);
+		SessionSettings->Set("EnemyConnected", auxValue, EOnlineDataAdvertisementType::ViaOnlineService);
 		auxOnSessionCreated = onCompleted;
 
 		const ULocalPlayer* localPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-		return Session->CreateSession(*localPlayer->GetPreferredUniqueNetId(), FName(hostName), *SessionSettings);
+		return Session->CreateSession(*localPlayer->GetPreferredUniqueNetId(),NAME_GameSession, *SessionSettings);
 	}
 
 	return false;
@@ -70,11 +71,8 @@ void AMainMenuGameMode::OnJoinedToSession(FName sessionName, EOnJoinSessionCompl
 
 				if (joinAdress != "")
 				{
-					FOnlineSessionSettings* newSettings = SessionInterface->GetSessionSettings(sessionName);
-					newSettings->Set("EnemyConnected", true, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-					newSettings->Set("EnemyName", auxPlayerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-					newSettings->Set("EnemyLogo", auxPlayerLogo, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-					SessionInterface->UpdateSession(sessionName, *newSettings);
+					InformSessionAboutMe(sessionName,auxPlayerName, auxPlayerLogo);
+					//pcController->ClientTravel(joinAdress, ETravelType::TRAVEL_Absolute);
 				}
 			}
 		}
@@ -83,20 +81,27 @@ void AMainMenuGameMode::OnJoinedToSession(FName sessionName, EOnJoinSessionCompl
 
 void AMainMenuGameMode::OnSessionUpdated(FName sessionName, bool success)
 {
-	GEngine->AddOnScreenDebugMessage(0, 10, FColor::Red, "Session Updated " + success);
-	if (APlayerController* pcController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+
+}
+
+void AMainMenuGameMode::InformSessionAboutMe_Implementation(FName sessionName, const FString& myNickname, int muLogo)
+{
+	if (HasAuthority())
 	{
-		FString joinAdress;
-
-		if (IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get())
+		if (IOnlineSubsystem* onlineSubsystem = IOnlineSubsystem::Get())
 		{
-			if (IOnlineSessionPtr SessionInterface = OnlineSubsystem->GetSessionInterface())
+			if (IOnlineSessionPtr sessionInterface = onlineSubsystem->GetSessionInterface())
 			{
-				SessionInterface->GetResolvedConnectString(sessionName, joinAdress);
-
-				if (joinAdress != "")
+				if (FNamedOnlineSession* session = sessionInterface->GetNamedSession(sessionName))
 				{
-					pcController->ClientTravel(joinAdress, ETravelType::TRAVEL_Absolute);
+					FOnlineSessionSettings settings = session->SessionSettings;
+					settings.Set(FName("EnemyConnected"), true);
+					settings.Set(FName("EnemyName"), myNickname);
+					settings.Set(FName("EnemyLogo"), muLogo);
+
+
+					sessionInterface->UpdateSession(sessionName, settings);
+					GEngine->AddOnScreenDebugMessage(0, 10, FColor::Blue, "Inform session about me ON SERVER");
 				}
 			}
 		}
@@ -140,7 +145,8 @@ void AMainMenuGameMode::OnSessionSearchCompleted(bool success)
 			result.Session.SessionSettings.Get("HostLogo", logoId);
 			result.Session.SessionSettings.Get("HostName", hostName);
 			result.Session.SessionSettings.Get("EnemyConnected", enemyConnected);
-			result.Session.SessionSettings.Get("EnemyName", enemyName);
+			if (result.Session.SessionSettings.Get("EnemyName", enemyName))
+				GEngine->AddOnScreenDebugMessage(0, 10, FColor::Green, "Am gasit enemy name");
 			result.Session.SessionSettings.Get("EnemyLogo", enemyLogo);
 			FoundSessions.Add(FSessionData(hostName, logoId, enemyConnected, enemyName, enemyLogo));
 		}

@@ -9,7 +9,6 @@
 
 DECLARE_DYNAMIC_DELEGATE(FOnSessionsUpdated);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSessionCreated,FName,sessionName,bool,success);
-//DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSessionJoined,FName,sessionName, EOnJoinSessionCompleteResult::Type,result);
 
 USTRUCT(BlueprintType)
 struct FSessionData
@@ -64,8 +63,12 @@ protected:
 	void OnJoinedToSession(FName sessionName, EOnJoinSessionCompleteResult::Type result);
 	void OnSessionSettingsUpdated(FName sesionName,const FOnlineSessionSettings &settings);
 	void OnSessionUpdated(FName sessionName, bool success);
+	UFUNCTION(Server,Reliable,BlueprintCallable, Category = "HD Online")
+	void InformSessionAboutMe(FName sessionName,const FString& myNickname,int muLogo);
+	void InformSessionAboutMe_Implementation(FName sessionName, const FString& myNickname,int muLogo);
 	FOnSessionsUpdated auxOnSessionsUpdated;
 	FOnSessionCreated auxOnSessionCreated;
+	FOnSessionsUpdated auxOnJoinedToSession;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	FString auxPlayerName;
 	int auxPlayerLogo;
