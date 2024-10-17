@@ -1,5 +1,5 @@
-#include "ChessPlayerController.h"
 #include "ChessPlayerPawn.h"
+#include "ChessPlayerController.h"
 
 AChessPlayerPawn::AChessPlayerPawn()
 {
