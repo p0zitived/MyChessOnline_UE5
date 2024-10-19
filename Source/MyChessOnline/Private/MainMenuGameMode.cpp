@@ -10,7 +10,7 @@ bool AMainMenuGameMode::CreateSession(FString hostName, int hostLogoIndx, FOnSes
 	if (OnlineSubsystem)
 	{
 		IOnlineSessionPtr Session = OnlineSubsystem->GetSessionInterface();
-
+		
 		bool auxValue = false;
 		TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
 		SessionSettings->bAllowJoinInProgress = true;
@@ -71,8 +71,8 @@ void AMainMenuGameMode::OnJoinedToSession(FName sessionName, EOnJoinSessionCompl
 
 				if (joinAdress != "")
 				{
-					InformSessionAboutMe(sessionName,auxPlayerName, auxPlayerLogo);
-					//pcController->ClientTravel(joinAdress, ETravelType::TRAVEL_Absolute);
+					InformSessionAboutMe(sessionName,auxPlayerName, auxPlayerLogo); // TO DO : trebuie de adaugat delay aici
+					pcController->ClientTravel(joinAdress, ETravelType::TRAVEL_Absolute);
 				}
 			}
 		}
@@ -99,9 +99,7 @@ void AMainMenuGameMode::InformSessionAboutMe_Implementation(FName sessionName, c
 					settings.Set(FName("EnemyName"), myNickname);
 					settings.Set(FName("EnemyLogo"), muLogo);
 
-
 					sessionInterface->UpdateSession(sessionName, settings);
-					GEngine->AddOnScreenDebugMessage(0, 10, FColor::Blue, "Inform session about me ON SERVER");
 				}
 			}
 		}
@@ -142,13 +140,15 @@ void AMainMenuGameMode::OnSessionSearchCompleted(bool success)
 			bool enemyConnected;
 			FString enemyName;
 			int enemyLogo;
+
+			GEngine->AddOnScreenDebugMessage(0, 10, FColor::Blue, FString::Printf(TEXT("players slots %i"), result.Session.SessionSettings.NumPublicConnections));
+
 			result.Session.SessionSettings.Get("HostLogo", logoId);
 			result.Session.SessionSettings.Get("HostName", hostName);
-			result.Session.SessionSettings.Get("EnemyConnected", enemyConnected);
-			if (result.Session.SessionSettings.Get("EnemyName", enemyName))
-				GEngine->AddOnScreenDebugMessage(0, 10, FColor::Green, "Am gasit enemy name");
-			result.Session.SessionSettings.Get("EnemyLogo", enemyLogo);
-			FoundSessions.Add(FSessionData(hostName, logoId, enemyConnected, enemyName, enemyLogo));
+			//result.Session.SessionSettings.Get("EnemyConnected", enemyConnected); // Ele lucreaza doar cand sesiunile nu sunt pe LAN
+			//result.Session.SessionSettings.Get("EnemyName", enemyName);
+			//result.Session.SessionSettings.Get("EnemyLogo", enemyLogo);
+			FoundSessions.Add(FSessionData(hostName, logoId, result.Session.NumOpenPublicConnections > 1, enemyName, enemyLogo));
 		}
 	}
 
