@@ -13,6 +13,8 @@ class MYCHESSONLINE_API AChessGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	AChessGameMode();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game Settings")
 	UChessRules* chessRules;
 
@@ -21,9 +23,16 @@ protected:
 	TArray<AChessPlayerController*> players;
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 private:
 	void GenerateBoard();
 	void SetUpBoard();
 	void PostLogin(APlayerController* NewPlayer);
+	void StartGame();
+	void TurnTick(float DeltaTime);
+
+	bool isBlackTurn;
+	float blackTurnRemainedTime;
+	float whiteTurnRemainedTime;
 };

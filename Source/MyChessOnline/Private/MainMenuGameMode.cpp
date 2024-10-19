@@ -1,7 +1,7 @@
+#include "MainMenuGameMode.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
-#include "MainMenuGameMode.h"
 #include <Kismet/GameplayStatics.h>
 
 bool AMainMenuGameMode::CreateSession(FString hostName, int hostLogoIndx, FOnSessionCreated onCompleted)

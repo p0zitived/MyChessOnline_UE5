@@ -1,9 +1,22 @@
 #include "ChessGameMode.h"
 
+AChessGameMode::AChessGameMode()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void AChessGameMode::BeginPlay() 
 {
+	Super::BeginPlay();
 	GenerateBoard();
 	SetUpBoard();
+}
+
+void AChessGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	GEngine->AddOnScreenDebugMessage(0, 5, FColor::Red, "Tick on gamemode");
+	TurnTick(DeltaTime);
 }
 
 void AChessGameMode::GenerateBoard()
@@ -68,5 +81,48 @@ void AChessGameMode::PostLogin(APlayerController* NewPlayer)
 	else
 	{
 		players[1]->Init(true);
+	}
+
+	if (players.Num() > 1)
+	{
+		FTimerHandle timerHandle;
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AChessGameMode::StartGame, 1); // start Game after timer
+	}
+}
+
+void AChessGameMode::StartGame()
+{
+	isBlackTurn = false;
+	blackTurnRemainedTime = chessRules->InitialTimePerPlayer;
+	whiteTurnRemainedTime = chessRules->InitialTimePerPlayer;
+
+	// inform players about turn start
+	for (int i=0;i<players.Num();i++)
+	{
+		players[i]->InvokeTurnStarted(false);
+	}
+}
+
+void AChessGameMode::TurnTick(float DeltaTime)
+{
+	if (isBlackTurn)
+	{
+		blackTurnRemainedTime -= DeltaTime;
+
+		// inform players about turn tick
+		for (int i = 0; i < players.Num(); i++)
+		{
+			players[i]->TurnTick(blackTurnRemainedTime);
+		}
+	}
+	else
+	{
+		whiteTurnRemainedTime -= DeltaTime;
+
+		// inform players about turn tick
+		for (int i = 0; i < players.Num(); i++)
+		{
+			players[i]->TurnTick(whiteTurnRemainedTime);
+		}
 	}
 }

@@ -15,6 +15,7 @@ void AChessPlayerController::Init(bool blackTeam)
 	// Dar problema este ca nustiu in ce ordine se executa setarea camerei, cineva ii face override la camera mea
 	FTimerHandle updateCameraTimer;
 	GetWorld()->GetTimerManager().SetTimer(updateCameraTimer,this,&AChessPlayerController::UpdateCamera,1);
+	bShowMouseCursor = true;
 }
 
 void AChessPlayerController::UpdateCamera()
@@ -38,4 +39,50 @@ void AChessPlayerController::UpdateCamera()
 	{
 		SetViewTarget(cameraActor);
 	}
+}
+
+AChessPlayerPawn* AChessPlayerController::GetControlledPlayerPawn()
+{
+	if (APawn* controlledPawn = GetPawn())
+	{
+		return Cast<AChessPlayerPawn>(controlledPawn);
+	}
+	return nullptr;
+}
+
+
+void AChessPlayerController::TurnTick_Implementation(float remainedTime)
+{
+	if (AChessPlayerPawn* playerPawn = GetControlledPlayerPawn())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ChessPlayerController : TurnTick called"));
+		TurnTickEvent(remainedTime);
+		playerPawn->TurnTick(remainedTime);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ChessPlayerController : controlled player pawn is Null"));
+	}
+}
+
+void AChessPlayerController::InvokeTurnStarted_Implementation(bool isBlackTurn)
+{
+	isMyTurn = (isBlackTurn && isInBlackTeam) || (!isBlackTurn && !isInBlackTeam);
+	if (AChessPlayerPawn* playerPawn = GetControlledPlayerPawn())
+	{
+		playerPawn->InvokeTurnStarted(isBlackTurn);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT("ChessPlayerController : controlled player pawn is Null"))
+	}
+	
+	OnTurnStarted(isBlackTurn);
+}
+
+void AChessPlayerController::OnTurnStarted_Implementation(bool isBlackTurn)
+{
+}
+void AChessPlayerController::TurnTickEvent_Implementation(float remainedTime)
+{
 }

@@ -51,5 +51,7 @@ public:
 	TSubclassOf<AChessCell> CellClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Set Up")
+	float InitialTimePerPlayer = 180;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Set Up")
 	FChessBoardData InitialBoardSetUp;
 };
