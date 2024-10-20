@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Camera/CameraActor.h"
+#include <ChessGameMode.h>
 
 void AChessPlayerController::Init(bool blackTeam)
 {
@@ -82,6 +83,13 @@ void AChessPlayerController::InvokeTurnStarted_Implementation(bool isBlackTurn)
 
 void AChessPlayerController::OnTurnStarted_Implementation(bool isBlackTurn)
 {
+}
+void AChessPlayerController::ServerFinishTurn_Implementation()
+{
+	if (AChessGameMode* gm = Cast<AChessGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		gm->FinishTurn();
+	}
 }
 void AChessPlayerController::TurnTickEvent_Implementation(float remainedTime)
 {

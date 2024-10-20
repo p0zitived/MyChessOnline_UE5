@@ -14,6 +14,7 @@ class MYCHESSONLINE_API AChessGameMode : public AGameModeBase
 	
 public:
 	AChessGameMode();
+	void FinishTurn();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game Settings")
 	UChessRules* chessRules;
@@ -24,6 +25,7 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void ServerFinishTurn_Implementation();
 
 private:
 	void GenerateBoard();

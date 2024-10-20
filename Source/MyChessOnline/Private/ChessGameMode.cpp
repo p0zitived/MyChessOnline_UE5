@@ -5,6 +5,7 @@ AChessGameMode::AChessGameMode()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+// PROTECTED FUNCTIONS
 void AChessGameMode::BeginPlay() 
 {
 	Super::BeginPlay();
@@ -19,6 +20,18 @@ void AChessGameMode::Tick(float DeltaTime)
 	TurnTick(DeltaTime);
 }
 
+void AChessGameMode::FinishTurn()
+{
+	isBlackTurn = !isBlackTurn;
+
+	// inform players about turn start
+	for (int i = 0; i < players.Num(); i++)
+	{
+		players[i]->InvokeTurnStarted(isBlackTurn);
+	}
+}
+
+// PRIVATE FUNCTIONS
 void AChessGameMode::GenerateBoard()
 {
 	cells.SetNum(chessRules->BoardLengthX);

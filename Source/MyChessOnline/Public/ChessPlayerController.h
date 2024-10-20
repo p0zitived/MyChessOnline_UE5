@@ -28,6 +28,10 @@ public:
 
 protected:
 	// FUNCTIONS
+	UFUNCTION(Server,Reliable,BlueprintCallable)
+	void ServerFinishTurn();
+	virtual void ServerFinishTurn_Implementation();
+
 	virtual void TurnTickEvent_Implementation(float remainedTime);
 	virtual void TurnTick_Implementation(float remainedTime);
 	virtual void InvokeTurnStarted_Implementation(bool isBlackTurn);

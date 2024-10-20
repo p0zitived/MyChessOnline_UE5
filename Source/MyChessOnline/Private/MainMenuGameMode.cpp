@@ -137,7 +137,6 @@ void AMainMenuGameMode::OnSessionSearchCompleted(bool success)
 		{
 			int logoId;
 			FString hostName;
-			bool enemyConnected;
 			FString enemyName;
 			int enemyLogo;
 
@@ -145,9 +144,6 @@ void AMainMenuGameMode::OnSessionSearchCompleted(bool success)
 
 			result.Session.SessionSettings.Get("HostLogo", logoId);
 			result.Session.SessionSettings.Get("HostName", hostName);
-			//result.Session.SessionSettings.Get("EnemyConnected", enemyConnected); // Ele lucreaza doar cand sesiunile nu sunt pe LAN
-			//result.Session.SessionSettings.Get("EnemyName", enemyName);
-			//result.Session.SessionSettings.Get("EnemyLogo", enemyLogo);
 			FoundSessions.Add(FSessionData(hostName, logoId, result.Session.NumOpenPublicConnections > 1, enemyName, enemyLogo));
 		}
 	}
