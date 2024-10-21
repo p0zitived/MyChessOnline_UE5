@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "ChessPawn.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 #include "ChessCell.generated.h"
 
 UENUM(BlueprintType)
@@ -24,22 +25,31 @@ class MYCHESSONLINE_API AChessCell : public AActor
 	
 public:	
 	AChessCell();
-	void SetState(EChessCellState newState);
 	void SetPawn(AChessPawn* p);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Settings")
 	UStaticMeshComponent* cellMesh;
+	UPROPERTY(Replicated,EditAnywhere, BlueprintReadOnly)
+	int cellVariationIndex = 0;
 
-	// EVENTS
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOneParamDelegate onStateChanged;
+	void SetState(EChessCellState newState);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetState(EChessCellState newState);
 
 protected:
+	void ClientSetState_Implementation(EChessCellState newState);
+
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnStateChanged(EChessCellState newState);
+	virtual void OnStateChanged_Implementation(EChessCellState newState);
 
 	AChessPawn* pawn;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Logic")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Main Logic")
 	EChessCellState currentState;
 
 public:	

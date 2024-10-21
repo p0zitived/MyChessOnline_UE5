@@ -137,8 +137,8 @@ void AMainMenuGameMode::OnSessionSearchCompleted(bool success)
 		{
 			int logoId;
 			FString hostName;
-			FString enemyName;
-			int enemyLogo;
+			FString enemyName = "";
+			int enemyLogo = 0;
 
 			GEngine->AddOnScreenDebugMessage(0, 10, FColor::Blue, FString::Printf(TEXT("players slots %i"), result.Session.SessionSettings.NumPublicConnections));
 

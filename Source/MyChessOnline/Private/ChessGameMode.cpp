@@ -16,7 +16,6 @@ void AChessGameMode::BeginPlay()
 void AChessGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(0, 5, FColor::Red, "Tick on gamemode");
 	TurnTick(DeltaTime);
 }
 
@@ -51,7 +50,11 @@ void AChessGameMode::GenerateBoard()
 
 			FRotator targetRotation = FRotator(0, 0, 0);
 
-			cells[x][y] = GetWorld()->SpawnActor<AChessCell>(chessRules->CellClass,targetLocation,targetRotation);
+			FActorSpawnParameters spawnParams;
+			spawnParams.Owner = this;
+
+			cells[x][y] = GetWorld()->SpawnActor<AChessCell>(chessRules->CellClass,targetLocation,targetRotation,spawnParams);
+			cells[x][y]->cellVariationIndex = (x % 2 + y) % 2;
 		}
 	}
 }
@@ -63,6 +66,8 @@ void AChessGameMode::SetUpBoard()
 	{
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		params.Owner = this;
+
 		AChessPawn* pawn = GetWorld()->SpawnActor<AChessPawn>(pawnData[i].pawnClass,params);
 		
 		// check daca sa primit sa spawnez pawn-ul

@@ -3,6 +3,12 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Camera/CameraActor.h"
 #include <ChessGameMode.h>
+#include "ChessCell.h"
+
+AChessPlayerController::AChessPlayerController()
+{
+	bReplicates = true;
+}
 
 void AChessPlayerController::Init(bool blackTeam)
 {
@@ -81,9 +87,11 @@ void AChessPlayerController::InvokeTurnStarted_Implementation(bool isBlackTurn)
 	OnTurnStarted(isBlackTurn);
 }
 
+
 void AChessPlayerController::OnTurnStarted_Implementation(bool isBlackTurn)
 {
 }
+
 void AChessPlayerController::ServerFinishTurn_Implementation()
 {
 	if (AChessGameMode* gm = Cast<AChessGameMode>(GetWorld()->GetAuthGameMode()))
@@ -91,6 +99,65 @@ void AChessPlayerController::ServerFinishTurn_Implementation()
 		gm->FinishTurn();
 	}
 }
+void AChessPlayerController::Tick(float DeltaTime)
+{
+	float mousePosX, mousePosY;
+	if (GetMousePosition(mousePosX, mousePosY))
+	{
+		FVector worldLocation;
+		FVector worldDir;
+
+		if (DeprojectScreenPositionToWorld(mousePosX, mousePosY, worldLocation, worldDir))
+		{
+			FHitResult hitResult;
+
+			bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, worldLocation, worldLocation + worldDir * 10000, ECollisionChannel::ECC_Camera);
+			if (bHit)
+			{
+				AChessCell* cell = Cast<AChessCell>(hitResult.GetActor());
+				if (cell)
+				{
+					OnCellHovered(cell);
+				}
+				else
+				{
+					cell = Cast<AChessCell>(hitResult.GetActor()->GetAttachParentActor());
+					if (cell)
+					{
+						OnCellHovered(cell);
+					}
+				}
+			}
+			else
+			{
+				OnCellHovered(nullptr);
+			}
+		}
+	}
+}
+
+void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
+{
+	if (currentHoveredCell)
+		ServerSetCellState(currentHoveredCell, EChessCellState::Default);
+	previousHoveredCell = currentHoveredCell;
+
+	currentHoveredCell = hoveredCell;
+	if (currentHoveredCell)
+		ServerSetCellState(currentHoveredCell, EChessCellState::Hovered);
+}
+
 void AChessPlayerController::TurnTickEvent_Implementation(float remainedTime)
 {
+}
+
+void AChessPlayerController::ServerSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)
+{
+	targetCell->SetState(newState);
+	ClientSetCellState(targetCell,newState);
+}
+
+void AChessPlayerController::ClientSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)
+{
+	targetCell->SetState(newState);
 }
