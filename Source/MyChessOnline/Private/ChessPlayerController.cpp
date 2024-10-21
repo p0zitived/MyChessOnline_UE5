@@ -136,25 +136,34 @@ void AChessPlayerController::Tick(float DeltaTime)
 	}
 }
 
+void AChessPlayerController::TurnTickEvent_Implementation(float remainedTime)
+{
+}
+
 void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
 {
 	if (currentHoveredCell)
 		ServerSetCellState(currentHoveredCell, EChessCellState::Default);
-	previousHoveredCell = currentHoveredCell;
 
+	previousHoveredCell = currentHoveredCell;
 	currentHoveredCell = hoveredCell;
+
 	if (currentHoveredCell)
 		ServerSetCellState(currentHoveredCell, EChessCellState::Hovered);
-}
-
-void AChessPlayerController::TurnTickEvent_Implementation(float remainedTime)
-{
 }
 
 void AChessPlayerController::ServerSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)
 {
 	targetCell->SetState(newState);
-	ClientSetCellState(targetCell,newState);
+
+	AChessGameMode* gm = Cast<AChessGameMode>(GetWorld()->GetAuthGameMode());
+	if (gm)
+	{
+		for (AChessPlayerController* player : gm->GetPlayers())
+		{
+			player->ClientSetCellState(targetCell, newState);
+		}
+	}
 }
 
 void AChessPlayerController::ClientSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)

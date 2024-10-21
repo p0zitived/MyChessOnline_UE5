@@ -15,6 +15,7 @@ class MYCHESSONLINE_API AChessGameMode : public AGameModeBase
 public:
 	AChessGameMode();
 	void FinishTurn();
+	TArray<AChessPlayerController*> GetPlayers() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game Settings")
 	UChessRules* chessRules;

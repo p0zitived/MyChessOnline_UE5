@@ -30,6 +30,11 @@ void AChessGameMode::FinishTurn()
 	}
 }
 
+TArray<AChessPlayerController*> AChessGameMode::GetPlayers() const
+{
+	return players;
+}
+
 // PRIVATE FUNCTIONS
 void AChessGameMode::GenerateBoard()
 {
