@@ -10,7 +10,7 @@ AChessPlayerController::AChessPlayerController()
 	bReplicates = true;
 }
 
-void AChessPlayerController::Init(bool blackTeam)
+void AChessPlayerController::Init_Implementation(bool blackTeam)
 {
 	if (isInited)
 		return;
@@ -149,7 +149,8 @@ void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
 		// if previouse cell was selected, do not change it's state
 		if (currentHoveredCell->GetState() != EChessCellState::Selected)
 		{
-			ServerSetCellState(currentHoveredCell, EChessCellState::Default);
+			currentHoveredCell->SetState(EChessCellState::Default);
+			ServerSetCellState(this,currentHoveredCell, EChessCellState::Default);
 		}
 	}
 
@@ -162,19 +163,21 @@ void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
 		// change cell state only if is not selected
 		if (currentHoveredCell->GetState() != EChessCellState::Selected)
 		{
-			ServerSetCellState(currentHoveredCell, EChessCellState::Hovered);
+			currentHoveredCell->SetState(EChessCellState::Hovered);
+			ServerSetCellState(this,currentHoveredCell, EChessCellState::Hovered);
 		}
 	}
 }
 
-void AChessPlayerController::ServerSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)
+void AChessPlayerController::ServerSetCellState_Implementation(AChessPlayerController* caller,AChessCell* targetCell, EChessCellState newState)
 {
 	AChessGameMode* gm = Cast<AChessGameMode>(GetWorld()->GetAuthGameMode());
 	if (gm)
 	{
 		for (AChessPlayerController* player : gm->GetPlayers())
 		{
-			player->ClientSetCellState(targetCell, newState);
+			if (player != caller)
+				player->ClientSetCellState(targetCell, newState);
 		}
 	}
 }
@@ -190,34 +193,42 @@ FString AChessPlayerController::OnMouseClicked()
 	if (!currentHoveredCell)
 		return "Current Hovered cell is null";
 
+	if (!isMyTurn)
+		return "Is not my turn";
+
 	switch (currentHoveredCell->GetState())
 	{
 		case EChessCellState::Default:
 			// deselect previouse selected cell
 			if (currentSelectedCell)
 			{
-				ServerSetCellState(currentSelectedCell, EChessCellState::Default);
+				ServerSetCellState(this,currentSelectedCell, EChessCellState::Default);
+				currentSelectedCell->SetState(EChessCellState::Default);
 			}
 
 			currentSelectedCell = currentHoveredCell;
-			ServerSetCellState(currentSelectedCell, EChessCellState::Selected);
+			ServerSetCellState(this, currentSelectedCell, EChessCellState::Selected);
+			currentSelectedCell->SetState(EChessCellState::Selected);
 			return "Cell State Was : Default";
 		break;
 		case EChessCellState::Hovered:
 			// deselect previouse selected cell
 			if (currentSelectedCell)
 			{
-				ServerSetCellState(currentSelectedCell, EChessCellState::Default);
+				ServerSetCellState(this, currentSelectedCell, EChessCellState::Default);
+				currentSelectedCell->SetState(EChessCellState::Default);
 			}
 
 			currentSelectedCell = currentHoveredCell;
-			ServerSetCellState(currentSelectedCell, EChessCellState::Selected);
+			ServerSetCellState(this, currentSelectedCell, EChessCellState::Selected);
+			currentSelectedCell->SetState(EChessCellState::Selected);
 			return "Cell State Was : Hovered";
 		break;
 		case EChessCellState::Selected:
 			if (currentSelectedCell == currentHoveredCell)
 			{
-				ServerSetCellState(currentSelectedCell, EChessCellState::Hovered);
+				ServerSetCellState(this, currentSelectedCell, EChessCellState::Hovered);
+				currentSelectedCell->SetState(EChessCellState::Hovered);
 				currentSelectedCell = nullptr;
 			}
 			return "Cell State Was : Selected";

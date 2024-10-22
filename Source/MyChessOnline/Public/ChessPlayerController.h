@@ -14,6 +14,7 @@ class MYCHESSONLINE_API AChessPlayerController : public APlayerController
 public:
 	AChessPlayerController();
 
+	UFUNCTION(Client,Reliable)
 	virtual void Init(bool blackTeam);
 	void UpdateCamera();
 	
@@ -39,12 +40,13 @@ protected:
 	virtual FString OnMouseClicked();
 	virtual void Tick(float DeltaTime) override;
 	virtual void TurnTickEvent_Implementation(float remainedTime);
+	virtual void Init_Implementation(bool blackTeam);
 	virtual void TurnTick_Implementation(float remainedTime);
 	virtual void InvokeTurnStarted_Implementation(bool isBlackTurn);
 
 	UFUNCTION(Server,Reliable)
-	void ServerSetCellState(AChessCell* targetCell, EChessCellState newState);
-	void ServerSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState);
+	void ServerSetCellState(AChessPlayerController* caller,AChessCell* targetCell, EChessCellState newState);
+	void ServerSetCellState_Implementation(AChessPlayerController* caller,AChessCell* targetCell, EChessCellState newState);
 
 	UFUNCTION(Client, Reliable)
 	void ClientSetCellState(AChessCell* targetCell, EChessCellState newState);
