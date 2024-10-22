@@ -21,6 +21,11 @@ void AChessCell::SetState(EChessCellState newState)
 	OnStateChanged(newState);
 }
 
+EChessCellState AChessCell::GetState() const
+{
+	return currentState;
+}
+
 void AChessCell::ClientSetState_Implementation(EChessCellState newState)
 {
 	SetState(newState);

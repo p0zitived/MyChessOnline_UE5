@@ -34,6 +34,9 @@ protected:
 	UFUNCTION(Server,Reliable,BlueprintCallable)
 	void ServerFinishTurn();
 	virtual void ServerFinishTurn_Implementation();
+
+	UFUNCTION(BlueprintCallable, Category= "Chess Player Controller")
+	virtual FString OnMouseClicked();
 	virtual void Tick(float DeltaTime) override;
 	virtual void TurnTickEvent_Implementation(float remainedTime);
 	virtual void TurnTick_Implementation(float remainedTime);
@@ -60,5 +63,6 @@ protected:
 	bool isMyTurn;
 	AChessCell* currentHoveredCell;
 	AChessCell* previousHoveredCell;
+	AChessCell* currentSelectedCell;
 	ACameraActor* cameraActor;
 };

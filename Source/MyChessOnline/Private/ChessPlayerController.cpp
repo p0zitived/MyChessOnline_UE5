@@ -21,8 +21,7 @@ void AChessPlayerController::Init(bool blackTeam)
 	// Numi place de facut prin delay
 	// Dar problema este ca nustiu in ce ordine se executa setarea camerei, cineva ii face override la camera mea
 	FTimerHandle updateCameraTimer;
-	GetWorld()->GetTimerManager().SetTimer(updateCameraTimer,this,&AChessPlayerController::UpdateCamera,1);
-	bShowMouseCursor = true;
+	GetWorld()->GetTimerManager().SetTimer(updateCameraTimer,this,&AChessPlayerController::UpdateCamera,2);
 }
 
 void AChessPlayerController::UpdateCamera()
@@ -101,6 +100,8 @@ void AChessPlayerController::ServerFinishTurn_Implementation()
 }
 void AChessPlayerController::Tick(float DeltaTime)
 {
+	bShowMouseCursor = true; // ALWAYS SHOW MOUSE
+
 	float mousePosX, mousePosY;
 	if (GetMousePosition(mousePosX, mousePosY))
 	{
@@ -142,20 +143,32 @@ void AChessPlayerController::TurnTickEvent_Implementation(float remainedTime)
 
 void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
 {
-	if (currentHoveredCell)
-		ServerSetCellState(currentHoveredCell, EChessCellState::Default);
+	// if we hovered another cell
+	if (currentHoveredCell && currentHoveredCell != hoveredCell)
+	{
+		// if previouse cell was selected, do not change it's state
+		if (currentHoveredCell->GetState() != EChessCellState::Selected)
+		{
+			ServerSetCellState(currentHoveredCell, EChessCellState::Default);
+		}
+	}
 
 	previousHoveredCell = currentHoveredCell;
 	currentHoveredCell = hoveredCell;
 
+	// if hovered cell isn't nullptr
 	if (currentHoveredCell)
-		ServerSetCellState(currentHoveredCell, EChessCellState::Hovered);
+	{
+		// change cell state only if is not selected
+		if (currentHoveredCell->GetState() != EChessCellState::Selected)
+		{
+			ServerSetCellState(currentHoveredCell, EChessCellState::Hovered);
+		}
+	}
 }
 
 void AChessPlayerController::ServerSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)
 {
-	targetCell->SetState(newState);
-
 	AChessGameMode* gm = Cast<AChessGameMode>(GetWorld()->GetAuthGameMode());
 	if (gm)
 	{
@@ -169,4 +182,53 @@ void AChessPlayerController::ServerSetCellState_Implementation(AChessCell* targe
 void AChessPlayerController::ClientSetCellState_Implementation(AChessCell* targetCell, EChessCellState newState)
 {
 	targetCell->SetState(newState);
+}
+
+// MOUSE CLICK LOGIC
+FString AChessPlayerController::OnMouseClicked()
+{
+	if (!currentHoveredCell)
+		return "Current Hovered cell is null";
+
+	switch (currentHoveredCell->GetState())
+	{
+		case EChessCellState::Default:
+			// deselect previouse selected cell
+			if (currentSelectedCell)
+			{
+				ServerSetCellState(currentSelectedCell, EChessCellState::Default);
+			}
+
+			currentSelectedCell = currentHoveredCell;
+			ServerSetCellState(currentSelectedCell, EChessCellState::Selected);
+			return "Cell State Was : Default";
+		break;
+		case EChessCellState::Hovered:
+			// deselect previouse selected cell
+			if (currentSelectedCell)
+			{
+				ServerSetCellState(currentSelectedCell, EChessCellState::Default);
+			}
+
+			currentSelectedCell = currentHoveredCell;
+			ServerSetCellState(currentSelectedCell, EChessCellState::Selected);
+			return "Cell State Was : Hovered";
+		break;
+		case EChessCellState::Selected:
+			if (currentSelectedCell == currentHoveredCell)
+			{
+				ServerSetCellState(currentSelectedCell, EChessCellState::Hovered);
+				currentSelectedCell = nullptr;
+			}
+			return "Cell State Was : Selected";
+		break;
+		case EChessCellState::Avaible:
+			return "Cell State Was : Avaible";
+		break;
+		case EChessCellState::Unavaible:
+			return "Cell State Was : Unavaible";
+		break;
+	}
+
+	return "Nothing passed";
 }

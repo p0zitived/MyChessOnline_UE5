@@ -33,6 +33,7 @@ public:
 	int cellVariationIndex = 0;
 
 	void SetState(EChessCellState newState);
+	EChessCellState GetState() const;
 
 	UFUNCTION(Client, Reliable)
 	void ClientSetState(EChessCellState newState);
