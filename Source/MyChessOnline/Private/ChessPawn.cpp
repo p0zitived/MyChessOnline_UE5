@@ -1,4 +1,5 @@
 #include "ChessPawn.h"
+#include "ChessCell.h"
 
 AChessPawn::AChessPawn()
 {
@@ -43,6 +44,62 @@ void AChessPawn::SetTeam(bool black)
 	{
 		staticMesh->SetStaticMesh(whiteMesh);
 	}
+}
+
+TArray<AChessCell*> AChessPawn::GetAvaibleCells(TArray<TArray<AChessCell*>> cells, int pawnCoordX, int pawnCoordY)
+{
+	TArray<AChessCell*> result = TArray<AChessCell*>();
+
+	if (!alreadyMovedOnce)
+	{
+		if (!isBlack)
+		{
+			// forward once
+			if (cells[pawnCoordX].IsValidIndex(pawnCoordY + 1))
+			{
+				result.Add(cells[pawnCoordX][pawnCoordY + 1]);
+			}
+			// forward twice
+			if (cells[pawnCoordX].IsValidIndex(pawnCoordY + 2))
+			{
+				result.Add(cells[pawnCoordX][pawnCoordY + 2]);
+			}
+		}
+		else
+		{
+			// forward once
+			if (cells[pawnCoordX].IsValidIndex(pawnCoordY - 1))
+			{
+				result.Add(cells[pawnCoordX][pawnCoordY - 1]);
+			}
+			// forward twice
+			if (cells[pawnCoordX].IsValidIndex(pawnCoordY - 2))
+			{
+				result.Add(cells[pawnCoordX][pawnCoordY - 2]);
+			}
+		}
+	}
+	else
+	{
+		if (!isBlack)
+		{
+			// forward once
+			if (cells[pawnCoordX].IsValidIndex(pawnCoordY + 1))
+			{
+				result.Add(cells[pawnCoordX][pawnCoordY + 1]);
+			}
+		}
+		else
+		{
+			// forward once
+			if (cells[pawnCoordX].IsValidIndex(pawnCoordY - 1))
+			{
+				result.Add(cells[pawnCoordX][pawnCoordY - 1]);
+			}
+		}
+	}
+
+	return result;
 }
 
 // NET CODING

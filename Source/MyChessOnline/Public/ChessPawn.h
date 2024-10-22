@@ -5,6 +5,8 @@
 #include "GameFramework/Pawn.h"
 #include "ChessPawn.generated.h"
 
+class AChessCell;
+
 UCLASS()
 class MYCHESSONLINE_API AChessPawn : public APawn
 {
@@ -24,9 +26,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	bool alreadyMovedOnce;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void SetTeam(bool black);
+	virtual TArray<AChessCell*> GetAvaibleCells(TArray<TArray<AChessCell*>> cells, int pawnCoordX,int pawnCoordY);
 };

@@ -7,6 +7,8 @@
 #include "ChessCell.h"
 #include "ChessPlayerController.generated.h"
 
+class AChessGameMode;
+
 UCLASS()
 class MYCHESSONLINE_API AChessPlayerController : public APlayerController
 {
@@ -15,7 +17,7 @@ public:
 	AChessPlayerController();
 
 	UFUNCTION(Client,Reliable)
-	virtual void Init(bool blackTeam);
+	virtual void Init(bool blackTeam, TArray<TArray<AChessCell*>> cells);
 	void UpdateCamera();
 	
 	UFUNCTION(BlueprintPure, Category="Chess Player Controller")
@@ -30,6 +32,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category="Chess Player Controller")
 	void TurnTickEvent(float remainedTime);
 
+	void GetCellCoords(AChessCell* targetCell, int& coordX, int& coordY);
+
 protected:
 	// FUNCTIONS
 	UFUNCTION(Server,Reliable,BlueprintCallable)
@@ -40,9 +44,11 @@ protected:
 	virtual FString OnMouseClicked();
 	virtual void Tick(float DeltaTime) override;
 	virtual void TurnTickEvent_Implementation(float remainedTime);
-	virtual void Init_Implementation(bool blackTeam);
+	virtual void Init_Implementation(bool blackTeam, TArray<TArray<AChessCell*>> cells);
 	virtual void TurnTick_Implementation(float remainedTime);
 	virtual void InvokeTurnStarted_Implementation(bool isBlackTurn);
+	void SelectCell(AChessCell* targetCell);
+	AChessGameMode* GetChessGameMode();
 
 	UFUNCTION(Server,Reliable)
 	void ServerSetCellState(AChessPlayerController* caller,AChessCell* targetCell, EChessCellState newState);
@@ -63,6 +69,7 @@ protected:
 	bool isInBlackTeam;
 	bool isInited;
 	bool isMyTurn;
+	TArray<TArray<AChessCell*>> boardCells;
 	AChessCell* currentHoveredCell;
 	AChessCell* previousHoveredCell;
 	AChessCell* currentSelectedCell;

@@ -8,7 +8,7 @@ AChessCell::AChessCell()
 	bReplicates = true;
 }
 
-void AChessCell::SetPawn(AChessPawn* p)
+void AChessCell::SetPawn_Implementation(AChessPawn* p)
 {
 	pawn = p;
 	pawn->SetActorLocation(GetActorLocation());
@@ -24,6 +24,11 @@ void AChessCell::SetState(EChessCellState newState)
 EChessCellState AChessCell::GetState() const
 {
 	return currentState;
+}
+
+AChessPawn* AChessCell::GetPawn() const
+{
+	return pawn;
 }
 
 void AChessCell::ClientSetState_Implementation(EChessCellState newState)
@@ -42,6 +47,7 @@ void AChessCell::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 	DOREPLIFETIME(AChessCell, cellVariationIndex);
 	DOREPLIFETIME(AChessCell, currentState);
+	DOREPLIFETIME(AChessCell, pawn);
 }
 
 void AChessCell::OnStateChanged_Implementation(EChessCellState newState)

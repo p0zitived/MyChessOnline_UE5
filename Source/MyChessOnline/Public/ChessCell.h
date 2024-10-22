@@ -25,6 +25,7 @@ class MYCHESSONLINE_API AChessCell : public AActor
 	
 public:	
 	AChessCell();
+	UFUNCTION(Client,Reliable)
 	void SetPawn(AChessPawn* p);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Settings")
@@ -37,17 +38,21 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientSetState(EChessCellState newState);
+	
+	AChessPawn* GetPawn() const;
 
 protected:
 	void ClientSetState_Implementation(EChessCellState newState);
 
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void SetPawn_Implementation(AChessPawn* p);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnStateChanged(EChessCellState newState);
 	virtual void OnStateChanged_Implementation(EChessCellState newState);
 
+	UPROPERTY(Replicated)
 	AChessPawn* pawn;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Main Logic")

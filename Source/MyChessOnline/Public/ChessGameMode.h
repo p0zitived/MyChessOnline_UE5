@@ -16,6 +16,8 @@ public:
 	AChessGameMode();
 	void FinishTurn();
 	TArray<AChessPlayerController*> GetPlayers() const;
+	TArray<TArray<AChessCell*>> GetCells() const;
+	void GetCellCoords(AChessCell* targetCell, int& coordX, int& coordY);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Game Settings")
 	UChessRules* chessRules;

@@ -30,9 +30,31 @@ void AChessGameMode::FinishTurn()
 	}
 }
 
+
 TArray<AChessPlayerController*> AChessGameMode::GetPlayers() const
 {
 	return players;
+}
+
+TArray<TArray<AChessCell*>> AChessGameMode::GetCells() const
+{
+	return cells;
+}
+
+void AChessGameMode::GetCellCoords(AChessCell* targetCell, int& coordX, int& coordY)
+{
+	for (int i = 0; i < cells.Num(); i++)
+	{
+		for (int j = 0; j < cells[i].Num(); j++)
+		{
+			if (cells[i][j] == targetCell)
+			{
+				coordX = i;
+				coordY = j;
+				return;
+			}
+		}
+	}
 }
 
 // PRIVATE FUNCTIONS
@@ -99,11 +121,11 @@ void AChessGameMode::PostLogin(APlayerController* NewPlayer)
 
 	if (players.Num() == 1)
 	{
-		players[0]->Init(false);
+		players[0]->Init(false,cells);
 	}
 	else
 	{
-		players[1]->Init(true);
+		players[1]->Init(true, cells);
 	}
 
 	if (players.Num() > 1)

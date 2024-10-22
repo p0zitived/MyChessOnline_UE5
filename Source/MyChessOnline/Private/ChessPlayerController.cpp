@@ -10,13 +10,13 @@ AChessPlayerController::AChessPlayerController()
 	bReplicates = true;
 }
 
-void AChessPlayerController::Init_Implementation(bool blackTeam)
+void AChessPlayerController::Init_Implementation(bool blackTeam, TArray<TArray<AChessCell*>> cells)
 {
 	if (isInited)
 		return;
 	isInBlackTeam = blackTeam;
 	isInited = true;
-
+	boardCells = cells;
 	// De schimbat aici
 	// Numi place de facut prin delay
 	// Dar problema este ca nustiu in ce ordine se executa setarea camerei, cineva ii face override la camera mea
@@ -91,6 +91,22 @@ void AChessPlayerController::OnTurnStarted_Implementation(bool isBlackTurn)
 {
 }
 
+void AChessPlayerController::GetCellCoords(AChessCell* targetCell, int& coordX, int& coordY)
+{
+	for (int i = 0; i < boardCells.Num(); i++)
+	{
+		for (int j = 0; j < boardCells[i].Num(); j++)
+		{
+			if (boardCells[i][j] == targetCell)
+			{
+				coordX = i;
+				coordY = j;
+				return;
+			}
+		}
+	}
+}
+
 void AChessPlayerController::ServerFinishTurn_Implementation()
 {
 	if (AChessGameMode* gm = Cast<AChessGameMode>(GetWorld()->GetAuthGameMode()))
@@ -147,7 +163,7 @@ void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
 	if (currentHoveredCell && currentHoveredCell != hoveredCell)
 	{
 		// if previouse cell was selected, do not change it's state
-		if (currentHoveredCell->GetState() != EChessCellState::Selected)
+		if (currentHoveredCell->GetState() == EChessCellState::Hovered)
 		{
 			currentHoveredCell->SetState(EChessCellState::Default);
 			ServerSetCellState(this,currentHoveredCell, EChessCellState::Default);
@@ -161,7 +177,7 @@ void AChessPlayerController::OnCellHovered(AChessCell* hoveredCell)
 	if (currentHoveredCell)
 	{
 		// change cell state only if is not selected
-		if (currentHoveredCell->GetState() != EChessCellState::Selected)
+		if (currentHoveredCell->GetState() == EChessCellState::Default)
 		{
 			currentHoveredCell->SetState(EChessCellState::Hovered);
 			ServerSetCellState(this,currentHoveredCell, EChessCellState::Hovered);
@@ -199,31 +215,11 @@ FString AChessPlayerController::OnMouseClicked()
 	switch (currentHoveredCell->GetState())
 	{
 		case EChessCellState::Default:
-			// deselect previouse selected cell
-			if (currentSelectedCell)
-			{
-				ServerSetCellState(this,currentSelectedCell, EChessCellState::Default);
-				currentSelectedCell->SetState(EChessCellState::Default);
-			}
-
-			currentSelectedCell = currentHoveredCell;
-			ServerSetCellState(this, currentSelectedCell, EChessCellState::Selected);
-			currentSelectedCell->SetState(EChessCellState::Selected);
+			SelectCell(currentHoveredCell);
 			return "Cell State Was : Default";
-		break;
 		case EChessCellState::Hovered:
-			// deselect previouse selected cell
-			if (currentSelectedCell)
-			{
-				ServerSetCellState(this, currentSelectedCell, EChessCellState::Default);
-				currentSelectedCell->SetState(EChessCellState::Default);
-			}
-
-			currentSelectedCell = currentHoveredCell;
-			ServerSetCellState(this, currentSelectedCell, EChessCellState::Selected);
-			currentSelectedCell->SetState(EChessCellState::Selected);
+			SelectCell(currentHoveredCell);
 			return "Cell State Was : Hovered";
-		break;
 		case EChessCellState::Selected:
 			if (currentSelectedCell == currentHoveredCell)
 			{
@@ -232,14 +228,61 @@ FString AChessPlayerController::OnMouseClicked()
 				currentSelectedCell = nullptr;
 			}
 			return "Cell State Was : Selected";
-		break;
 		case EChessCellState::Avaible:
 			return "Cell State Was : Avaible";
-		break;
 		case EChessCellState::Unavaible:
 			return "Cell State Was : Unavaible";
-		break;
 	}
 
 	return "Nothing passed";
+}
+
+void AChessPlayerController::SelectCell(AChessCell* targetCell)
+{
+	if (!targetCell)
+		return;
+
+	// deselect previouse selected cell
+	if (currentSelectedCell)
+	{
+		ServerSetCellState(this, currentSelectedCell, EChessCellState::Default);
+		currentSelectedCell->SetState(EChessCellState::Default);
+	}
+
+	currentSelectedCell = targetCell;
+	ServerSetCellState(this, currentSelectedCell, EChessCellState::Selected);
+	currentSelectedCell->SetState(EChessCellState::Selected);
+
+	if (AChessPawn* pawn = currentSelectedCell->GetPawn())
+	{
+		int x, y;
+		GetCellCoords(currentSelectedCell, x, y);
+		TArray<AChessCell*> avaibleCells = pawn->GetAvaibleCells(boardCells, x, y);
+
+		for (AChessCell* cell : avaibleCells)
+		{
+			cell->SetState(EChessCellState::Avaible);
+			ServerSetCellState(this, cell, EChessCellState::Avaible);
+		}
+
+		// clear all avaible cells
+		for (int i = 0; i < boardCells.Num(); i++)
+		{
+			for (int j = 0; j < boardCells[i].Num(); j++)
+			{
+				if ((boardCells[i][j]->GetState() == EChessCellState::Avaible ||
+					boardCells[i][j]->GetState() == EChessCellState::Unavaible) &&
+					!avaibleCells.Contains(boardCells[i][j]))
+				{
+					boardCells[i][j]->SetState(EChessCellState::Default);
+					ServerSetCellState(this, boardCells[i][j], EChessCellState::Default);
+				}
+			}
+		}
+	}
+}
+
+AChessGameMode* AChessPlayerController::GetChessGameMode()
+{
+	return Cast<AChessGameMode>(GetWorld()->GetAuthGameMode());
 }
